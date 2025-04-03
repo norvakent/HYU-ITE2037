@@ -1,3 +1,5 @@
+package assignment_1;
+
 import java.util.Scanner;
 
 public class CarRentalSystem {
@@ -54,6 +56,7 @@ public class CarRentalSystem {
     }
     return;
   }
+
   public static void main(String[] args) {
     // initialize scanner for user input
     Scanner scanner = new Scanner(System.in);

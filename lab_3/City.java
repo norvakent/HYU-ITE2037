@@ -1,3 +1,5 @@
+package lab_3;
+
 public class City {
   private String name;
   private int locationX;

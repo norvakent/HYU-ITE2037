@@ -1,3 +1,5 @@
+package assignment_1;
+
 public class Car {
   private String brand;        // the brand of the car
   private String model;        // the model of the car

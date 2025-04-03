@@ -1,3 +1,5 @@
+package lab_3;
+
 public class CityTest {
   public static void main(String[] args) {
     City city1 = new City("Seoul", 23, 45);

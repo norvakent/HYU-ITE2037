@@ -1,3 +1,5 @@
+package assignment_1;
+
 public class RentalOrder {
   private Car car;             // the car being rented
   private String customerName; // the name of the customer
