@@ -27,9 +27,21 @@ public class CarRentalSystem {
 
   // method to list all available cars
   public void listAvailableCars() {
+    // exception handling for empty inventory
+    int availableCars = 0;
+    for (int i=0; i<this.carCount; i++) {
+      if (this.cars[i].isAvailable()) {
+        availableCars++;
+      }
+    }
+    if (availableCars == 0) {
+      System.out.println("No cars available for rent.");
+      return;
+    }
+
     System.out.println("Available Cars:");
     // iterate through the car array and print only available cars
-    for (int i = 0; i < this.carCount; i++) {
+    for (int i=0; i < this.carCount; i++) {
       if (this.cars[i].isAvailable()) {
         System.out.println(i + ": " + this.cars[i].toString());
       }
@@ -41,11 +53,11 @@ public class CarRentalSystem {
   public void rentCar(String customerName, int carIndex, int days) {
     // exception handling for invalid car index
     if (carIndex < 0 || carIndex >= this.carCount) {
-      System.out.println("Invalid car index. Please try again.");
+      System.out.println("Invalid car selection.");
     }
     // exception handling for unavailable car
     else if (!this.cars[carIndex].isAvailable()) {
-      System.out.println("This car is not available for rent.");
+      System.out.println("Selected car is not available.");
     }
     else {
       // create a instance of RentalOrder class
@@ -126,16 +138,19 @@ public class CarRentalSystem {
           System.out.println();
           break;
 
-        default:
-          // loop back to the menu if the user enters an invalid option
+        case 4: // exit the program
           // entering 4 will exit the loop and the program
           // at the condition of this while loop
+          // display exit message
+          System.out.println("Thank you for using the Car Rental System!");
+          break;
+        default:
+          // loop back to the menu if the user enters an invalid option
+          System.out.println("Invalid option.\n");
           break;
       }
     }
 
-    // display exit message
-    System.out.println("Thank you for using the Car Rental System!");
     scanner.close();
     return;
   }
