@@ -20,6 +20,11 @@ public class Customer {
     return this.isVIP;
   }
 
+  public void setVIP(boolean isVIP) {
+    this.isVIP = isVIP;
+    return;
+  }
+
   // return string representation of the customer
   public String toString() {
     return this.name + (this.isVIP ? " (VIP)" : "");

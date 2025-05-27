@@ -1,38 +1,43 @@
 package assignment_3;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class CarRentalSystem {
-  private Car[] cars;             // list of cars in the system
+  private ArrayList<Car> cars;             // list of cars in the system
   private int carCount;           // number of cars
   private Customer[] customers;   // list of registered customers
   private int customerCount;      // number of customers
-  private RentalOrder[] orders;   // list of rental orders
+  private ArrayList<RentalOrder> orders;   // list of rental orders
   private int orderCount;         // number of rental orders
+  private FileHandler<CarRentalSystem> fileHandler;
 
   // constructor initializes empty arrays
   public CarRentalSystem() {
-    this.cars = new Car[0];
+    this.cars = new ArrayList<Car>();
     this.carCount = 0;
     this.customers = new Customer[0];
     this.customerCount = 0;
-    this.orders = new RentalOrder[0];
+    this.orders = new ArrayList<RentalOrder>();
     this.orderCount = 0;
+    this.fileHandler = new CSVHandler(this);
   }
 
   // method to add a car to the system
   public void addCar(Car car) {
     // resize array if full
-    if (this.carCount == this.cars.length) {
-      Car[] newCars = new Car[this.carCount + 10];
-      for (int i=0; i<this.cars.length; i++) {
-        newCars[i] = this.cars[i];
-      }
-      this.cars = newCars;
-    }
+    // if (this.carCount == this.cars.length) {
+    //   Car[] newCars = new Car[this.carCount + 10];
+    //   for (int i=0; i<this.cars.length; i++) {
+    //     newCars[i] = this.cars[i];
+    //   }
+    //   this.cars = newCars;
+    // }
+    this.carCount++;
     car.setAvailability(true); // mark car as available
-    this.cars[this.carCount++] = car;
+    this.cars.add(car);
     return;
   }
 
@@ -45,8 +50,8 @@ public class CarRentalSystem {
     }
     // iterate and display only available cars.
     for (int i=0; i<this.carCount; i++) {
-      if (this.cars[i].isAvailable()) {
-        System.out.println(i + ": " + this.cars[i].toString());
+      if (this.cars.get(i).isAvailable()) {
+        System.out.println(i + ": " + this.cars.get(i).toString());
       }
     }
     return;
@@ -63,7 +68,7 @@ public class CarRentalSystem {
       this.customers = newCustomers;
     }
     // add customer
-    this.customers[this.customerCount++] = customer;
+    this.customers[customerCount++] = customer;
     return;
   }
 
@@ -100,7 +105,7 @@ public class CarRentalSystem {
       return;
     }
     // exception handling for unavailable car
-    if (!this.cars[carIndex].isAvailable()) {
+    if (!this.cars.get(carIndex).isAvailable()) {
       System.out.println("Selected car is not available.");
       return;
     }
@@ -111,16 +116,16 @@ public class CarRentalSystem {
     }
 
     // resize array if full
-    if (this.orderCount == this.orders.length) {
-      RentalOrder[] newOrders = new RentalOrder[this.orderCount + 10];
-      for (int i=0; i<this.orderCount; i++) {
-        newOrders[i] = this.orders[i];
-      }
-      this.orders = newOrders;
-    }
+    // if (this.orderCount == this.orders.length) {
+    //   RentalOrder[] newOrders = new RentalOrder[this.orderCount + 10];
+    //   for (int i=0; i<this.orderCount; i++) {
+    //     newOrders[i] = this.orders[i];
+    //   }
+    //   this.orders = newOrders;
+    // }
     
     // select car
-    Car car = this.cars[carIndex];
+    Car car = this.cars.get(carIndex);
     
     // select customer
     Customer customer = null;
@@ -144,7 +149,7 @@ public class CarRentalSystem {
     }
     
     // store order and confirm
-    this.orders[this.orderCount++] = order;
+    this.orders.add(order);
     System.out.println("Rental created successfully!");
     System.out.println(order.toString());
     return;
@@ -154,7 +159,7 @@ public class CarRentalSystem {
   public boolean hasAvailableCars() {
     // iterate and if found available car then return true
     for (int i=0; i<this.carCount; i++) {
-      if (this.cars[i].isAvailable()) {
+      if (this.cars.get(i).isAvailable()) {
         return true;
       }
     }
@@ -170,9 +175,56 @@ public class CarRentalSystem {
     }
     // iterate and display order info
     for(int i=0; i<this.orderCount; i++) {
-      System.out.println(this.orders[i].toString());
+      System.out.println(this.orders.get(i).toString());
     }
     return;
+  }
+
+  public void saveAllData(String filename) {
+    try {
+      if (fileHandler.saveData(filename)) {
+        System.out.println("System data saved to " + filename);
+      }
+    } catch (IOException e) {
+      System.out.println("I/O error occurred while accessing file.");
+      return;
+    }
+    return;
+  }
+
+  public void loadAllData(String filename) {
+    try {
+      fileHandler.loadData(filename);
+    } catch (DataFormatException e) {
+      System.out.println("Skipped line due to invalid format.");
+    } catch (IOException e) {
+      System.out.println("I/O error occurred while accessing file.");
+    }
+    return;
+  }
+
+  public ArrayList<Car> getCars() {
+    return this.cars;
+  }
+
+  public ArrayList<RentalOrder> getOrders() {
+    return this.orders;
+  }
+
+  public Customer[] getCustomers() {
+    return this.customers;
+  }
+
+  public int getCarIndexByInfo(Car car) {
+    for (Car c : this.cars) {
+      if (c.getBrand().equals(car.getBrand()) &&
+          c.getModel().equals(car.getModel()) &&
+          c.getYear() == car.getYear() &&
+          c.getDailyRate() == car.getDailyRate()) {
+        return this.cars.indexOf(c);
+      }
+    }
+    return -1;
   }
 
   public static void main(String[] args) {
@@ -182,9 +234,10 @@ public class CarRentalSystem {
     // create a instance of CarRentalSystem class
     CarRentalSystem rentalSystem = new CarRentalSystem();
     int option = 0;
+    String filename = "";
 
     // service loop works until the user selects option 7
-    while (option != 7) {
+    while (option != 9) {
       // display welcome message and menu options
       System.out.println("Welcome to the Car Rental System!");
       System.out.println("1. Add Car");
@@ -202,6 +255,7 @@ public class CarRentalSystem {
       try {
         option = scanner.nextInt();
       } catch (InputMismatchException e) {
+        System.out.println("Invalid input type. Pleasse enter a number.");
         option = 0;
       }
       scanner.nextLine(); // ignore newline character
@@ -222,7 +276,7 @@ public class CarRentalSystem {
           try {
             year = scanner.nextInt();
           } catch (InputMismatchException e) {
-            System.out.println("Invalid input.\n");
+            System.out.println("Invalid input type. Pleasse enter a number.");
             scanner.nextLine(); // clear buffer
             break;
           }
@@ -234,7 +288,7 @@ public class CarRentalSystem {
           try {
             dailyRate = scanner.nextDouble();
           } catch (InputMismatchException e) {
-            System.out.println("Invalid input.\n");
+            System.out.println("Invalid input type. Pleasse enter a number.");
             scanner.nextLine(); // clear buffer
             break;
           }
@@ -310,7 +364,7 @@ public class CarRentalSystem {
           try {
             carIndex = scanner.nextInt();
           } catch (InputMismatchException e) {
-            System.out.println("Invalid input.\n");
+            System.out.println("Invalid input type. Pleasse enter a number.");
             scanner.nextLine(); // clear buffer
             break;
           }
@@ -322,7 +376,7 @@ public class CarRentalSystem {
           try {
             rentalDays = scanner.nextInt();
           } catch (InputMismatchException e) {
-            System.out.println("invalid input.\n");
+            System.out.println("Invalid input type. Pleasse enter a number.");
             scanner.nextLine(); // clear buffer
             break;
           }
@@ -339,9 +393,14 @@ public class CarRentalSystem {
           break;
 
         case 7:
+          System.out.print("Enter filename to save (e.g., data.csv): ");
+          filename = scanner.nextLine();
+          rentalSystem.saveAllData(filename);
           break;
 
         case 8:
+          filename = scanner.nextLine();
+          rentalSystem.loadAllData(filename);
           break;
 
         case 9: // exit the program

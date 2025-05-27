@@ -34,7 +34,24 @@ public class Car {
     return this.isAvailable;
   }
 
+  public String getBrand() {
+    return this.brand;
+  }
+
+  public String getModel() {
+    return this.model;
+  }
+
+  public int getYear() {
+    return this.year;
+  }
+
+  public double getDailyRate() {
+    return this.dailyRate;
+  }
+
   // return string representation of the car
+  @Override
   public String toString() {
     return this.brand + " " +
            this.model + " (" +

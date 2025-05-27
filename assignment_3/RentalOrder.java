@@ -16,6 +16,18 @@ public abstract class RentalOrder {
   // abstract method to calculate total rental price (implemented in subclasses) 
   public abstract double calculateTotalPrice();
 
+  public Car getCar() {
+    return this.car;
+  }
+
+  public Customer getCustomer() {
+    return this.customer;
+  }
+
+  public int getRentalDays() {
+    return this.rentalDays;
+  }
+
   // return summary of the rental order
   public String toString() {
     return "Rental for: " + this.customer.toString() + "\n" +
