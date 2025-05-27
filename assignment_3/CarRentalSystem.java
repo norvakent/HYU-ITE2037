@@ -149,6 +149,7 @@ public class CarRentalSystem {
     }
     
     // store order and confirm
+    this.orderCount++;
     this.orders.add(order);
     System.out.println("Rental created successfully!");
     System.out.println(order.toString());
@@ -180,26 +181,13 @@ public class CarRentalSystem {
     return;
   }
 
-  public void saveAllData(String filename) {
-    try {
-      if (fileHandler.saveData(filename)) {
-        System.out.println("System data saved to " + filename);
-      }
-    } catch (IOException e) {
-      System.out.println("I/O error occurred while accessing file.");
-      return;
-    }
+  public void saveAllData(String filename) throws IOException{
+    fileHandler.saveData(filename);
     return;
   }
 
-  public void loadAllData(String filename) {
-    try {
-      fileHandler.loadData(filename);
-    } catch (DataFormatException e) {
-      System.out.println("Skipped line due to invalid format.");
-    } catch (IOException e) {
-      System.out.println("I/O error occurred while accessing file.");
-    }
+  public void loadAllData(String filename) throws IOException, DataFormatException{
+    fileHandler.loadData(filename);
     return;
   }
 
@@ -234,7 +222,11 @@ public class CarRentalSystem {
     // create a instance of CarRentalSystem class
     CarRentalSystem rentalSystem = new CarRentalSystem();
     int option = 0;
-    String filename = "";
+    String filename = "rental_data.csv";
+    try {
+      rentalSystem.loadAllData(filename);
+      System.out.println("System data loaded from " + filename + "\n");
+    } catch (DataFormatException | IOException e) {}
 
     // service loop works until the user selects option 7
     while (option != 9) {
@@ -296,10 +288,12 @@ public class CarRentalSystem {
 
           // create a new Car object and add it to the system
           Car car = new Car(brand, model, year, dailyRate);
-          rentalSystem.addCar(car);
-
-          // display success message
-          System.out.println("Car added successfully!\n");
+          if (rentalSystem.getCarIndexByInfo(car) == -1) {
+            rentalSystem.addCar(car);
+            // display success message
+            System.out.println("Car added successfully!\n");
+          }
+          else System.out.println("This car already exists in the system.\n");
           break;
 
         case 2: // display available cars
@@ -395,18 +389,35 @@ public class CarRentalSystem {
         case 7:
           System.out.print("Enter filename to save (e.g., data.csv): ");
           filename = scanner.nextLine();
-          rentalSystem.saveAllData(filename);
+          try {
+            rentalSystem.saveAllData(filename);
+            System.out.println("System data saved to " + filename + "\n");
+          } catch (IOException e) {
+            System.out.println("I/O error occurred while accessing file.");
+          }
           break;
 
         case 8:
+          System.out.print("Enter filename to load (e.g., data.csv): ");
           filename = scanner.nextLine();
-          rentalSystem.loadAllData(filename);
+          try {
+            rentalSystem.loadAllData(filename);
+            System.out.println("System data loaded from " + filename + "\n");
+          } catch (DataFormatException e) {
+            System.out.println("Skipped line due to invalid format.");
+          } catch (IOException e) {
+            System.out.println("I/O error occurred while accessing file.");
+          }
           break;
 
         case 9: // exit the program
           // entering 9 will exit the loop and the program
           // at the condition of this while loop
           // display exit message
+          try {
+            rentalSystem.saveAllData("rental_data.csv");
+            System.out.println("System data saved to rental_data.csv");
+          } catch (IOException e) {}
           System.out.println("Thank you for using the Car Rental System!");
           break;
 

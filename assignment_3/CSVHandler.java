@@ -23,8 +23,9 @@ public class CSVHandler implements FileHandler<CarRentalSystem> {
     try {
       file = new File(filename);
       if (file.exists()) {
-        // 파일 존재 시 덮어쓰기 여부 묻고 
-        // 로드해서 시스템에 덮어쓴 뒤 새로 기록
+        this.loadData(filename);
+        file.delete();
+        file.createNewFile();
       }
       writer = new BufferedWriter(new FileWriter(filename));
     } catch (FileNotFoundException e) {
