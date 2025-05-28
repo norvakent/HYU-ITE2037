@@ -180,7 +180,7 @@ public class CarRentalSystem {
     return;
   }
   
-  // below 3 getters is not safety
+  // below 3 getters are not safety
   // getter for cars list
   public ArrayList<Car> getCars() {
     return this.cars;
