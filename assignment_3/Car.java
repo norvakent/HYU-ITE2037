@@ -34,18 +34,22 @@ public class Car {
     return this.isAvailable;
   }
 
+  // getter for brand
   public String getBrand() {
     return this.brand;
   }
 
+  // getter for model
   public String getModel() {
     return this.model;
   }
 
+  // getter for year
   public int getYear() {
     return this.year;
   }
 
+  // getter for daily rental rate
   public double getDailyRate() {
     return this.dailyRate;
   }

@@ -7,12 +7,12 @@ import java.util.Scanner;
 
 public class CarRentalSystem {
   private ArrayList<Car> cars;             // list of cars in the system
-  private int carCount;           // number of cars
-  private Customer[] customers;   // list of registered customers
-  private int customerCount;      // number of customers
+  private int carCount;                    // number of cars
+  private Customer[] customers;            // list of registered customers
+  private int customerCount;               // number of customers
   private ArrayList<RentalOrder> orders;   // list of rental orders
-  private int orderCount;         // number of rental orders
-  private FileHandler<CarRentalSystem> fileHandler;
+  private int orderCount;                  // number of rental orders
+  private FileHandler<CarRentalSystem> fileHandler; // file handler for loading and saving data
 
   // constructor initializes empty arrays
   public CarRentalSystem() {
@@ -22,19 +22,12 @@ public class CarRentalSystem {
     this.customerCount = 0;
     this.orders = new ArrayList<RentalOrder>();
     this.orderCount = 0;
+    // initialize file handler for CSV operations
     this.fileHandler = new CSVHandler(this);
   }
 
   // method to add a car to the system
   public void addCar(Car car) {
-    // resize array if full
-    // if (this.carCount == this.cars.length) {
-    //   Car[] newCars = new Car[this.carCount + 10];
-    //   for (int i=0; i<this.cars.length; i++) {
-    //     newCars[i] = this.cars[i];
-    //   }
-    //   this.cars = newCars;
-    // }
     this.carCount++;
     car.setAvailability(true); // mark car as available
     this.cars.add(car);
@@ -114,15 +107,6 @@ public class CarRentalSystem {
       System.out.println("Customer not found. Please register first.");
       return;
     }
-
-    // resize array if full
-    // if (this.orderCount == this.orders.length) {
-    //   RentalOrder[] newOrders = new RentalOrder[this.orderCount + 10];
-    //   for (int i=0; i<this.orderCount; i++) {
-    //     newOrders[i] = this.orders[i];
-    //   }
-    //   this.orders = newOrders;
-    // }
     
     // select car
     Car car = this.cars.get(carIndex);
@@ -181,28 +165,37 @@ public class CarRentalSystem {
     return;
   }
 
+  // method to save data to a file
+  // exception will be handled by the caller
   public void saveAllData(String filename) throws IOException{
     fileHandler.saveData(filename);
     return;
   }
 
+  // method to load data from a file
+  // exception will be handled by the caller
   public void loadAllData(String filename) throws IOException, DataFormatException{
     fileHandler.loadData(filename);
     return;
   }
-
+  
+  // below 3 getters is not safety
+  // getter for cars list
   public ArrayList<Car> getCars() {
     return this.cars;
   }
 
+  // getter for orders list
   public ArrayList<RentalOrder> getOrders() {
     return this.orders;
   }
 
+  // getter for customers list
   public Customer[] getCustomers() {
     return this.customers;
   }
 
+  // getter for car index by car info
   public int getCarIndexByInfo(Car car) {
     for (Car c : this.cars) {
       if (c.getBrand().equals(car.getBrand()) &&
@@ -221,12 +214,17 @@ public class CarRentalSystem {
 
     // create a instance of CarRentalSystem class
     CarRentalSystem rentalSystem = new CarRentalSystem();
-    int option = 0;
-    String filename = "rental_data.csv";
+    int option = 0; // default value is 0
+    String filename = "rental_data.csv"; // default filename for auto-saving/loading
+    // try to load data from the default file when the program starts
     try {
       rentalSystem.loadAllData(filename);
-      System.out.println("System data loaded from " + filename + "\n");
-    } catch (DataFormatException | IOException e) {}
+      System.out.println("System data automatically loaded from " + filename + "\n");
+    } catch (DataFormatException e) {
+      System.out.println("Skipped line due to invalid format.");
+    } catch (IOException e) {
+      System.out.println("I/O error occurred while accessing file.");
+    }
 
     // service loop works until the user selects option 7
     while (option != 9) {
@@ -247,7 +245,9 @@ public class CarRentalSystem {
       try {
         option = scanner.nextInt();
       } catch (InputMismatchException e) {
-        System.out.println("Invalid input type. Pleasse enter a number.");
+        // handle invalid option input
+        System.out.println("Invalid input type. Please enter a number.");
+        // reset option to 0 to loop back to the menu
         option = 0;
       }
       scanner.nextLine(); // ignore newline character
@@ -256,44 +256,37 @@ public class CarRentalSystem {
       switch (option) {
 
         case 1: // add a new car to the system
-          // prompt user for car details
-          System.out.print("Enter brand: ");
-          String brand = scanner.nextLine();
-          System.out.print("Enter model: ");
-          String model = scanner.nextLine();
-
-          // read year with exception handling
-          System.out.print("Enter year: ");
-          int year;
           try {
+            // prompt user for car details
+            System.out.print("Enter brand: ");
+            String brand = scanner.nextLine();
+            System.out.print("Enter model: ");
+            String model = scanner.nextLine();
+
+            // read year throws InputMismatchException
+            System.out.print("Enter year: ");
+            int year;
             year = scanner.nextInt();
-          } catch (InputMismatchException e) {
-            System.out.println("Invalid input type. Pleasse enter a number.");
-            scanner.nextLine(); // clear buffer
-            break;
-          }
-          scanner.nextLine(); // ignore newline character
+            scanner.nextLine(); // ignore newline character
 
-          // read daily rate with exception handling
-          System.out.print("Enter daily rate: ");
-          double dailyRate;
-          try {
-            dailyRate = scanner.nextDouble();
-          } catch (InputMismatchException e) {
-            System.out.println("Invalid input type. Pleasse enter a number.");
-            scanner.nextLine(); // clear buffer
-            break;
-          }
-          scanner.nextLine(); // ignore newline character
+            // read daily rate throws InputMismatchException
+            System.out.print("Enter daily rate: ");
+            double dailyRate = scanner.nextDouble();
+            scanner.nextLine(); // ignore newline character
 
-          // create a new Car object and add it to the system
-          Car car = new Car(brand, model, year, dailyRate);
-          if (rentalSystem.getCarIndexByInfo(car) == -1) {
-            rentalSystem.addCar(car);
-            // display success message
-            System.out.println("Car added successfully!\n");
+            // create a new Car object and add it to the system
+            Car car = new Car(brand, model, year, dailyRate);
+            if (rentalSystem.getCarIndexByInfo(car) == -1) {
+              rentalSystem.addCar(car);
+              // display success message
+              System.out.println("Car added successfully!\n");
+            }
+            else System.out.println("This car already exists in the system.\n");
+          } catch (InputMismatchException e) {
+            // handle invalid input type for year or daily rate
+            scanner.nextLine(); // clear buffer
+            System.out.println("Invalid input type. Please enter a number.");
           }
-          else System.out.println("This car already exists in the system.\n");
           break;
 
         case 2: // display available cars
@@ -335,50 +328,44 @@ public class CarRentalSystem {
           System.out.println("Customer registered succesfully!\n");
           break;
 
-        case 4: // display registere customers
+        case 4: // display registered customers
           rentalSystem.listCustomers();
           System.out.println();
           break;
 
         case 5: // rent a car
-          // exception handling for no available cars
-          if (!rentalSystem.hasAvailableCars()) {
-            System.out.println("No cars available for rent.\n");
-            break;
-          }
-
-          // prompt user for rental details
-          System.out.print("Enter customer name: ");
-          String customerName = scanner.nextLine();
-          rentalSystem.listAvailableCars();
-
-          // read car index with exception handling
-          System.out.print("Enter car index to rent: ");
-          int carIndex;
           try {
+            // exception handling for no available cars
+            if (!rentalSystem.hasAvailableCars()) {
+              System.out.println("No cars available for rent.\n");
+              break;
+            }
+
+            // prompt user for rental details
+            System.out.print("Enter customer name: ");
+            String customerName = scanner.nextLine();
+            rentalSystem.listAvailableCars();
+
+            // read car index throws InputMismatchException
+            System.out.print("Enter car index to rent: ");
+            int carIndex;
             carIndex = scanner.nextInt();
-          } catch (InputMismatchException e) {
-            System.out.println("Invalid input type. Pleasse enter a number.");
             scanner.nextLine(); // clear buffer
-            break;
-          }
-          scanner.nextLine(); // ignore newline character
 
-          // read rental days with exception handling
-          System.out.print("Enter number of rental days: ");
-          int rentalDays;
-          try {
+            // read rental days throws InputMismatchException
+            System.out.print("Enter number of rental days: ");
+            int rentalDays;
             rentalDays = scanner.nextInt();
-          } catch (InputMismatchException e) {
-            System.out.println("Invalid input type. Pleasse enter a number.");
-            scanner.nextLine(); // clear buffer
-            break;
-          }
-          scanner.nextLine(); // ignore newline character
+            scanner.nextLine(); // ignore newline character
 
-          // process rental
-          rentalSystem.rentCar(customerName, carIndex, rentalDays);
-          System.out.println();
+            // process rental
+            rentalSystem.rentCar(customerName, carIndex, rentalDays);
+            System.out.println();
+          } catch (InputMismatchException e) {
+            // handle invalid input type for car index or rental days
+            scanner.nextLine(); // clear buffer
+            System.out.println("Invalid input type. Please enter a number.");
+          }
           break;
 
         case 6: // dlsplay all rental orders
@@ -387,25 +374,28 @@ public class CarRentalSystem {
           break;
 
         case 7:
-          System.out.print("Enter filename to save (e.g., data.csv): ");
-          filename = scanner.nextLine();
           try {
+            System.out.print("Enter filename to save (e.g., data.csv): ");
+            filename = scanner.nextLine();
             rentalSystem.saveAllData(filename);
             System.out.println("System data saved to " + filename + "\n");
           } catch (IOException e) {
+            // handle IOException
             System.out.println("I/O error occurred while accessing file.");
           }
           break;
 
         case 8:
-          System.out.print("Enter filename to load (e.g., data.csv): ");
-          filename = scanner.nextLine();
           try {
+            System.out.print("Enter filename to load (e.g., data.csv): ");
+            filename = scanner.nextLine();
             rentalSystem.loadAllData(filename);
             System.out.println("System data loaded from " + filename + "\n");
           } catch (DataFormatException e) {
+            // handle DataFormatException
             System.out.println("Skipped line due to invalid format.");
           } catch (IOException e) {
+            // handle IOException
             System.out.println("I/O error occurred while accessing file.");
           }
           break;
@@ -414,10 +404,14 @@ public class CarRentalSystem {
           // entering 9 will exit the loop and the program
           // at the condition of this while loop
           // display exit message
+          
+          // try to save data to the default file before exiting
           try {
             rentalSystem.saveAllData("rental_data.csv");
-            System.out.println("System data saved to rental_data.csv");
-          } catch (IOException e) {}
+            System.out.println("System data automatically saved to rental_data.csv");
+          } catch (IOException e) {
+            System.out.println("I/O error occurred while accessing file.");
+          }
           System.out.println("Thank you for using the Car Rental System!");
           break;
 

@@ -15,14 +15,9 @@ public class Customer {
     return this.name;
   }
 
-  // check if the customer is a VIP
+  // getter for VIP status
   public boolean isVIP() {
     return this.isVIP;
-  }
-
-  public void setVIP(boolean isVIP) {
-    this.isVIP = isVIP;
-    return;
   }
 
   // return string representation of the customer
