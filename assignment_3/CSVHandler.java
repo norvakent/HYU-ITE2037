@@ -169,7 +169,7 @@ public class CSVHandler implements FileHandler<CarRentalSystem> {
     } catch (FileNotFoundException e) {
       // this exception is caught when the file does not exist
       System.out.println("File not found. Data loading failed.");
-      return this.system;
+      throw e;
     }
     // reader will automatically close after try-with-resources block
 

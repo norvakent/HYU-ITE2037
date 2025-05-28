@@ -1,5 +1,6 @@
 package assignment_3;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
@@ -220,6 +221,8 @@ public class CarRentalSystem {
     try {
       rentalSystem.loadAllData(filename);
       System.out.println("System data automatically loaded from " + filename + "\n");
+    } catch (FileNotFoundException e) {
+      System.out.println("Automatic loading failed: rental_data.csv not found.");
     } catch (DataFormatException e) {
       System.out.println("Skipped line due to invalid format.");
     } catch (IOException e) {
@@ -246,7 +249,7 @@ public class CarRentalSystem {
         option = scanner.nextInt();
       } catch (InputMismatchException e) {
         // handle invalid option input
-        System.out.println("Invalid input type. Please enter a number.");
+        System.out.println("Invalid input type. Please enter a number.\n");
         // reset option to 0 to loop back to the menu
         option = 0;
       }
@@ -285,7 +288,7 @@ public class CarRentalSystem {
           } catch (InputMismatchException e) {
             // handle invalid input type for year or daily rate
             scanner.nextLine(); // clear buffer
-            System.out.println("Invalid input type. Please enter a number.");
+            System.out.println("Invalid input type. Please enter a number.\n");
           }
           break;
 
@@ -364,7 +367,7 @@ public class CarRentalSystem {
           } catch (InputMismatchException e) {
             // handle invalid input type for car index or rental days
             scanner.nextLine(); // clear buffer
-            System.out.println("Invalid input type. Please enter a number.");
+            System.out.println("Invalid input type. Please enter a number.\n");
           }
           break;
 
