@@ -8,7 +8,6 @@ public class RandomNumberGenerator extends NumberGenerator {
   private int number;
 
   public RandomNumberGenerator() {
-    super();
     random = new Random();
     number = 0;
   }

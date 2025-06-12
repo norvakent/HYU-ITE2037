@@ -4,11 +4,7 @@ import java.util.ArrayList;
 
 // NumberGenerator: Subject 역할
 public abstract class NumberGenerator {
-  private ArrayList<Observer> observers;
-
-  public NumberGenerator() {
-    observers = new ArrayList<Observer>();
-  }
+  private ArrayList<Observer> observers = new ArrayList<Observer>();
 
   // Observer 등록
   public void addObserver(Observer observer) {
