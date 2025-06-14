@@ -1,4 +1,4 @@
-package "assignment_4"
+package assignment_4;
 
 public class OrderManager implements RentalObserver {
 	private ArrayList<String> logs;

@@ -1,4 +1,4 @@
-package "assignment_4"
+package assignment_4;
 
 public class WaitingCustomer {
   private Customer customer;

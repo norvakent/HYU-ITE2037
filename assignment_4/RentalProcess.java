@@ -1,4 +1,4 @@
-package "assignment_4"
+package assignment_4;
 
 public class RentalProcess extends Thread {
 	private RentalOrder order;

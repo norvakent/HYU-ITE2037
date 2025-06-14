@@ -1,9 +1,11 @@
-package assignment_3;
+package assignment_4;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.InputMismatchException;
+import java.util.Queue;
 import java.util.Scanner;
 
 public class CarRentalSystem {
@@ -423,7 +425,19 @@ public class CarRentalSystem {
           }
           break;
 
-        case 9: // exit the program
+        case 9: 
+
+          break;
+        
+        case 10:
+
+          break;
+
+        case 11:
+
+          break;
+
+        case 12: // exit the program
           // entering 9 will exit the loop and the program
           // at the condition of this while loop
           // display exit message

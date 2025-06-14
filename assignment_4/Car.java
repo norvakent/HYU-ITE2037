@@ -1,4 +1,4 @@
-package assignment_3;
+package assignment_4;
 
 public class Car {
   private String brand;        // the brand of the car

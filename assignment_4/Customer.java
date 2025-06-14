@@ -1,4 +1,4 @@
-package assignment_3;
+package assignment_4;
 
 public class Customer {
   private String name;     // customer name

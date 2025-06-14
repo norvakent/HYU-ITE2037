@@ -1,4 +1,4 @@
-package assignment_3;
+package assignment_4;
 
 public abstract class RentalOrder {
   protected Car car;             // the car being rented
