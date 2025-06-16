@@ -1,5 +1,7 @@
 package assignment_4;
 
+import java.util.ArrayList;
+
 public class OrderManager implements RentalObserver {
 	private ArrayList<String> logs;
 	private int completedOrders;
@@ -9,9 +11,17 @@ public class OrderManager implements RentalObserver {
 		completedOrders = 0;
 	}
 
+	@Override
 	public void update(RentalOrder order) {
-		completedOrders++;
-		//
+		Car returnedCar = order.getCar();
+		logs.add("Order completed: Customer " + order.getCustomer().getName() +
+											 " has returned car " + returnedCar.getBrand() +
+											 " " + returnedCar.getModel() +
+											 "\nCar " + returnedCar.getBrand() +
+											 " " + returnedCar.getModel() +
+											 " is now available");
+		returnedCar.setAvailability(true);
+		System.out.println(logs.get(completedOrders++));
 	}
 
 	public void printAllLogs() {

@@ -175,7 +175,7 @@ public class CarRentalSystem {
 
   // method to save data to a file
   // exception will be handled by the caller
-  public void saveAllData(String filename) throws IOException{
+  public void saveAllData(String filename) throws IOException {
     fileHandler.saveData(filename);
     return;
   }
@@ -263,7 +263,10 @@ public class CarRentalSystem {
       System.out.println("6. View Rental Orders");
       System.out.println("7. Save Data");
       System.out.println("8. Load Data");
-      System.out.println("9. Exit");
+      System.out.println("9. View Customer Points");
+      System.out.println("10. View Rental Logs");
+      System.out.println("11. View Waiting List");
+      System.out.println("12. Exit");
       System.out.print("Select option: ");
 
       // read user input
