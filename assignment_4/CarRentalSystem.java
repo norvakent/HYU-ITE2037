@@ -18,9 +18,9 @@ public class CarRentalSystem {
   private ArrayList<RentalOrder> orders;   // list of rental orders
   private int orderCount;                  // number of rental orders
   private FileHandler<CarRentalSystem> fileHandler; // file handler for loading and saving data
-	// private HashMap<Customer, Integer> pointsMap;
-	// pointsMap.put(customer, pointsMap.getOrDefault(customer, 0) + rentalDays);
 	private HashMap<Car, Queue<WaitingCustomer>> waitingList;
+  private OrderManager observer;
+  private int activeRentals;
 
   // constructor initializes empty arrays
   public CarRentalSystem() {
@@ -32,8 +32,9 @@ public class CarRentalSystem {
     this.orderCount = 0;
     // initialize file handler for CSV operations
     this.fileHandler = new CSVHandler(this);
-    // this.pointsMap = new HashMap<Customer, Integer>();
     this.waitingList = new HashMap<Car, Queue<WaitingCustomer>>();
+    this.observer = new OrderManager();
+    this.activeRentals = 0;
   }
 
   // method to add a car to the system
@@ -55,6 +56,16 @@ public class CarRentalSystem {
       if (this.cars.get(i).isAvailable()) {
         System.out.println(i + ": " + this.cars.get(i).toString());
       }
+    }
+  }
+
+  public void listAllCars() {
+    if (carCount == 0) {
+      System.out.println("No cars registered.");
+      return;
+    }
+    for (int i = 0; i < this.carCount; i++) {
+      System.out.println(i + ": " + this.cars.get(i).toString());
     }
   }
 
@@ -104,10 +115,10 @@ public class CarRentalSystem {
       return;
     }
     // exception handling for unavailable car
-    if (!this.cars.get(carIndex).isAvailable()) {
-      System.out.println("Selected car is not available.");
-      return;
-    }
+    // if (!this.cars.get(carIndex).isAvailable()) {
+    //   System.out.println("Selected car is not available.");
+    //   return;
+    // }
     // exception handling for unregistered customer
     if (!this.customerExists(customerName)) {
       System.out.println("Customer not found. Please register first.");
@@ -121,11 +132,21 @@ public class CarRentalSystem {
     Customer customer = null;
     // find the customer object by name
     // this is guaranteed to exist because we checked before with customerExists method
-    for (int i=0; i<this.customerCount; i++) {
+    for (int i = 0; i < this.customerCount; i++) {
       if (this.customers[i].getName().equals(customerName)) {
         customer = this.customers[i];
         break;
       }
+    }
+
+    if (!car.isAvailable()) {
+      System.out.println("Selected car is not available.");
+      System.out.println("Customer " + customerName +
+                         " (days: " + rentalDays +
+                         ") added to the waiting list for car " +
+                         car.getBrand() + " " + car.getModel());
+      addCustomerToQueue(car, customer, rentalDays);
+      return;
     }
 
     // create order
@@ -143,6 +164,20 @@ public class CarRentalSystem {
     this.orders.add(order);
     System.out.println("Rental created successfully!");
     System.out.println(order.toString());
+
+    synchronized (this) {
+      while (activeRentals >= 3) {
+        try {
+          this.wait();
+        } catch (InterruptedException e) {
+          Thread.currentThread().interrupt();
+        }
+      }
+      activeRentals++;
+    }
+    RentalProcess process = new RentalProcess(order, this);
+    process.addObserver(this.observer);
+    process.start();
   }
 
   // method to check the system has available cars
@@ -181,7 +216,6 @@ public class CarRentalSystem {
     fileHandler.loadData(filename);
   }
   
-  /*
   // below 3 getters are not safety
   // getter for cars list
   public ArrayList<Car> getCars() {
@@ -210,7 +244,6 @@ public class CarRentalSystem {
     }
     return -1;
   }
-  */
 
   public void assignCarToNextCustomer(Car car) {
     WaitingCustomer wc = getNextWaitingCustomer(car);
@@ -223,15 +256,45 @@ public class CarRentalSystem {
     waitingList.get(car).offer(new WaitingCustomer(customer, rentalDays));
   }
 
+  // public void registerObserver(RentalObserver observer) {
+  //   observers.add(observer);
+  // }
+
+  // public void removeObserver(RentalObserver observer) {
+  //   observers.remove(observer);
+  // }
+
+  public void rentalFinished() {
+    synchronized (this) {
+      if (activeRentals > 0) activeRentals--;
+      this.notifyAll();
+    }
+  }
+
+  public void printRentalLogs() {
+    observer.printAllLogs();
+  }
+
   public WaitingCustomer getNextWaitingCustomer(Car car) {
     Queue<WaitingCustomer> queue = waitingList.get(car);
     if (queue != null && !queue.isEmpty()) return queue.poll();
     return null;
   }
 
-  public void startRentalProcess(RentalOrder order) {
-    RentalProcess process = new RentalProcess(order, this);
-    process.start();
+  // public void startRentalProcess(RentalOrder order) {
+  // }
+
+  public void printWaitingList() {
+    if (waitingList.isEmpty()) {
+      System.out.println("Waiting list is empty.");
+      return;
+    }
+    for (Map.Entry<Car, Queue<WaitingCustomer>> entry : waitingList.entrySet()) {
+      System.out.println(entry.getKey().toString());
+      for (WaitingCustomer wc : entry.getValue()) {
+        System.out.println("  - " + wc.getCustomer().getName() + " (" + wc.getRentalDays() + " days)");
+      }
+    }
   }
 
 
@@ -241,7 +304,6 @@ public class CarRentalSystem {
 
     // create a instance of CarRentalSystem class
     CarRentalSystem rentalSystem = new CarRentalSystem();
-    OrderManager orderManager = new OrderManager();
 
     int option = 0; // default value is 0
     String filename = "rental_data.csv"; // default filename for auto-saving/loading
@@ -257,12 +319,12 @@ public class CarRentalSystem {
       System.out.println("I/O error occurred while accessing file.");
     }
 
-    // service loop works until the user selects option 7
-    while (option != 9) {
+    // service loop works until the user selects option 12
+    while (option != 12) {
       // display welcome message and menu options
       System.out.println("Welcome to the Car Rental System!");
       System.out.println("1. Add Car");
-      System.out.println("2. List Available Cars");
+      System.out.println("2. List All Cars");
       System.out.println("3. Register Customer");
       System.out.println("4. List Customers");
       System.out.println("5. Rent a Car");
@@ -311,11 +373,12 @@ public class CarRentalSystem {
 
             // create a new Car object and add it to the system
             Car car = new Car(brand, model, year, dailyRate);
-            rentalSystem.addCar(car);
-            // display success message
-            System.out.println("Car added successfully!\n");
-
-            System.out.println("This car already exists in the system.\n");
+            if (rentalSystem.getCarIndexByInfo(car) == -1) {
+              rentalSystem.addCar(car);
+              // display success message
+              System.out.println("Car added successfully!\n");
+            }
+            else System.out.println("This car already exists in the system.\n");
           } catch (InputMismatchException e) {
             // handle invalid input type for year or daily rate
             scanner.nextLine(); // clear buffer
@@ -323,8 +386,8 @@ public class CarRentalSystem {
           }
           break;
 
-        case 2: // display available cars
-          rentalSystem.listAvailableCars();
+        case 2: // display all cars
+          rentalSystem.listAllCars();
           System.out.println();
           break;
 
@@ -370,15 +433,16 @@ public class CarRentalSystem {
         case 5: // rent a car
           try {
             // exception handling for no available cars
-            if (!rentalSystem.hasAvailableCars()) {
-              System.out.println("No cars available for rent.\n");
-              break;
-            }
+            // if (!rentalSystem.hasAvailableCars()) {
+            //   System.out.println("No cars available for rent.\n");
+            //   break;
+            // }
 
             // prompt user for rental details
             System.out.print("Enter customer name: ");
             String customerName = scanner.nextLine();
-            rentalSystem.listAvailableCars();
+            // rentalSystem.listAvailableCars();
+            rentalSystem.listAllCars();
 
             // read car index throws InputMismatchException
             System.out.print("Enter car index to rent: ");
@@ -436,18 +500,22 @@ public class CarRentalSystem {
 
         case 9:
           ArrayList<Customer> rankedCustomers = new ArrayList<Customer>();
-          for (Customer c : rentalSystem.customers) {
-            rankedCustomers.add(c);
+          for (int i = 0; i < rentalSystem.customerCount; i++) {
+            rankedCustomers.add(rentalSystem.customers[i]);
           }
-          rankedCustomers.sort
+          rankedCustomers.sort((a, b) -> Integer.compare(b.getPoints(), a.getPoints()));
+          System.out.println("Customer Points:");
+          for (Customer c : rankedCustomers) {
+            System.out.println(c.getName() + ": " + c.getPoints() + " points");
+          }
           break;
         
         case 10:
-          rentalSystem;
+          rentalSystem.observer.printAllLogs();
           break;
 
         case 11:
-
+          rentalSystem.printWaitingList();
           break;
 
         case 12: // exit the program
@@ -467,7 +535,6 @@ public class CarRentalSystem {
 
         default: // invalid menu input
           // loop back to the menu if the user enters an invalid option
-          System.out.println("Invalid option.\n");
           break;
       }
     }

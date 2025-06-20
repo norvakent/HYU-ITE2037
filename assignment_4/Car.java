@@ -24,13 +24,12 @@ public class Car {
   }
 
   // setter for availability status
-  public void setAvailability(boolean status) {
+  public synchronized void setAvailability(boolean status) {
     this.isAvailable = status;
-    return;
   }
 
   // getter for availability status
-  public boolean isAvailable() {
+  public synchronized boolean isAvailable() {
     return this.isAvailable;
   }
 

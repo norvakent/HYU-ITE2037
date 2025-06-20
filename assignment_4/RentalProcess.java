@@ -29,19 +29,19 @@ public class RentalProcess extends Thread {
 		try {
 			int rentalDays = order.getRentalDays();
 			for (int i = 1; i <= rentalDays; i++) {
-				System.out.println("[" + order.getCustomer().getName() + "] Rental day " + i + "/" + rentalDays);
+				System.out.println("Order in progress: " + order.getCar().getBrand() +
+													 " " + order.getCar().getModel() +
+													 " - Day " + i + "/" + rentalDays);
 				Thread.sleep(1000);
 			}
-
-			synchronized (order.getCar()) {
-				order.getCar().setAvailability(true);
-			}
-			order.getCustomer().addPoints(rentalDays);
-
+			
 			notifyObservers();
-			if (system.getNextWaitingCustomer(order.getCar()) != null) {
+			order.getCustomer().addPoints(rentalDays);
+			synchronized (order.getCar()) {
 				system.assignCarToNextCustomer(order.getCar());
 			}
+			system.rentalFinished();
+
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
