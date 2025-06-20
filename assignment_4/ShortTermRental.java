@@ -6,6 +6,10 @@ public class ShortTermRental extends RentalOrder {
     super(car, customer, rentalDays);
   }
 
+  public ShortTermRental(Car car, Customer customer, int rentalDays, boolean isAvailable) {
+    super(car, customer, rentalDays, isAvailable);
+  }
+
   // calculate price with optional VIP discound (10%)
   @Override
   public double calculateTotalPrice() {

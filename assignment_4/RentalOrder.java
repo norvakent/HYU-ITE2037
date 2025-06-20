@@ -13,6 +13,13 @@ public abstract class RentalOrder {
     this.car.setAvailability(false); // car becomes unavailable once rented
   }
 
+  public RentalOrder(Car car, Customer customer, int rentalDays, boolean isAvailable) {
+    this.car = car;
+    this.customer = customer;
+    this.rentalDays = rentalDays;
+    this.car.setAvailability(true);
+  }
+
   // abstract method to calculate total rental price (implemented in subclasses) 
   public abstract double calculateTotalPrice();
 

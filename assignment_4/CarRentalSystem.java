@@ -37,6 +37,19 @@ public class CarRentalSystem {
     this.activeRentals = 0;
   }
 
+  public CarRentalSystem(ArrayList<Car> cars, Customer[] customers, int customerCount, ArrayList<RentalOrder> rentalOrders) {
+    this.cars = cars;
+    this.carCount = cars.size();
+    this.customers = customers;
+    this.customerCount = customerCount;
+    this.orders = rentalOrders;
+    this.orderCount = rentalOrders.size();
+    this.fileHandler = null;
+    this.waitingList = null;
+    this.observer = null;
+    this.activeRentals = 0;
+  }
+
   // method to add a car to the system
   public void addCar(Car car) {
     this.carCount++;
@@ -165,16 +178,6 @@ public class CarRentalSystem {
     System.out.println("Rental created successfully!");
     System.out.println(order.toString());
 
-    synchronized (this) {
-      while (activeRentals >= 3) {
-        try {
-          this.wait();
-        } catch (InterruptedException e) {
-          Thread.currentThread().interrupt();
-        }
-      }
-      activeRentals++;
-    }
     RentalProcess process = new RentalProcess(order, this);
     process.addObserver(this.observer);
     process.start();
@@ -199,7 +202,7 @@ public class CarRentalSystem {
       return;
     }
     // iterate and display order info
-    for(int i=0; i<this.orderCount; i++) {
+    for(int i = 0; i < this.orderCount; i++) {
       System.out.println(this.orders.get(i).toString());
     }
   }
@@ -213,7 +216,13 @@ public class CarRentalSystem {
   // method to load data from a file
   // exception will be handled by the caller
   public void loadAllData(String filename) throws IOException, DataFormatException{
-    fileHandler.loadData(filename);
+    CarRentalSystem loadedSystem = fileHandler.loadData(filename);
+    this.cars = loadedSystem.cars;
+    this.carCount = loadedSystem.carCount;
+    this.customers = loadedSystem.customers;
+    this.customerCount = loadedSystem.customerCount;
+    this.orders = loadedSystem.orders;
+    this.orderCount = loadedSystem.orderCount;
   }
   
   // below 3 getters are not safety
@@ -264,12 +273,12 @@ public class CarRentalSystem {
   //   observers.remove(observer);
   // }
 
-  public void rentalFinished() {
-    synchronized (this) {
-      if (activeRentals > 0) activeRentals--;
-      this.notifyAll();
-    }
-  }
+  // public void rentalFinished() {
+  //   synchronized (this) {
+  //     if (activeRentals > 0) activeRentals--;
+  //     this.notifyAll();
+  //   }
+  // }
 
   public void printRentalLogs() {
     observer.printAllLogs();
@@ -277,7 +286,11 @@ public class CarRentalSystem {
 
   public WaitingCustomer getNextWaitingCustomer(Car car) {
     Queue<WaitingCustomer> queue = waitingList.get(car);
-    if (queue != null && !queue.isEmpty()) return queue.poll();
+    if (queue != null && !queue.isEmpty()) {
+      WaitingCustomer nextCustomer = queue.poll();
+      if (queue.isEmpty()) waitingList.remove(car);
+      return nextCustomer;
+    }
     return null;
   }
 
@@ -292,9 +305,26 @@ public class CarRentalSystem {
     for (Map.Entry<Car, Queue<WaitingCustomer>> entry : waitingList.entrySet()) {
       System.out.println(entry.getKey().toString());
       for (WaitingCustomer wc : entry.getValue()) {
-        System.out.println("  - " + wc.getCustomer().getName() + " (" + wc.getRentalDays() + " days)");
+        System.out.println(" - " + wc.getCustomer().getName() + " (" + wc.getRentalDays() + " days)");
       }
     }
+  }
+
+  public synchronized boolean tryAcquireRentalSlot() {
+    while (activeRentals >= 3) {
+      try {
+        wait();
+      } catch (InterruptedException e) {
+        return false;
+      }
+    }
+    activeRentals++;
+    return true;
+  }
+
+  public synchronized void releaseRentalSlot() {
+    if (activeRentals > 0) activeRentals--;
+    notifyAll();
   }
 
 

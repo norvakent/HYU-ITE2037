@@ -6,6 +6,10 @@ public class LongTermRental extends RentalOrder {
     super(car, customer, rentalDays);
   }
 
+  public LongTermRental(Car car, Customer customer, int rentalDays, boolean isAvailable) {
+    super(car, customer, rentalDays, isAvailable);
+  }
+
   // calculat price with 15% long-term discount and optional 10% VIP discount
   @Override
   public double calculateTotalPrice() {

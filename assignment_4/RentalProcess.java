@@ -26,6 +26,8 @@ public class RentalProcess extends Thread {
 
 	@Override
 	public void run() {
+		if (!system.tryAcquireRentalSlot()) return;
+
 		try {
 			int rentalDays = order.getRentalDays();
 			for (int i = 1; i <= rentalDays; i++) {
@@ -40,10 +42,11 @@ public class RentalProcess extends Thread {
 			synchronized (order.getCar()) {
 				system.assignCarToNextCustomer(order.getCar());
 			}
-			system.rentalFinished();
 
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+		} finally {
+			system.releaseRentalSlot();
 		}
 	}
 }

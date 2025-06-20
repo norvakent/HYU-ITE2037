@@ -24,9 +24,8 @@ public class CSVHandler implements FileHandler<CarRentalSystem> {
     try {
       file = new File(filename);
       // if file exists, load data from it and then create a new file
-      // this logic is not exactly overwriting, but updating the file
       if (file.exists()) {
-        this.loadData(filename);
+        // this.loadData(filename);
         file.delete();
         file.createNewFile();
       }
@@ -35,9 +34,9 @@ public class CSVHandler implements FileHandler<CarRentalSystem> {
       System.out.println("File not found. Creating new file...");
       // create a new file if it does not exist
       file.createNewFile();
-    } catch (DataFormatException e) {
-      // handling DataFormatException
-      System.out.println("Skipped line due to invalid format.");
+    // } catch (DataFormatException e) {
+    //   // handling DataFormatException
+    //   System.out.println("Skipped line due to invalid format.");
     }
 
     try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
@@ -75,7 +74,10 @@ public class CSVHandler implements FileHandler<CarRentalSystem> {
       // This ensures that no duplicate car entries are added when processing the CSV file.
       // Without this check, duplicate car entries could lead to ambiguity when associating rental orders with specific cars.
       // Cars in this list are not added to the system, also associated orders will not be loaded.
-      ArrayList<Car> existingCars = new ArrayList<Car>();
+      // ArrayList<Car> existingCars = new ArrayList<Car>();
+      CarRentalSystem loadedSystem = new CarRentalSystem();
+      ArrayList<RentalOrder> loadedOrders = new ArrayList<>();
+      int customerCount = 0;
       // Read each line from the file
       while ((line = reader.readLine()) != null) {
         // Split the line by commas to get individual data fields
@@ -94,16 +96,17 @@ public class CSVHandler implements FileHandler<CarRentalSystem> {
             // create a new Car object
             Car car = new Car(brand, model, year, dailyRate);
             // determine if the car already exists in the system
-            int carIndex = system.getCarIndexByInfo(car);
+            // int carIndex = system.getCarIndexByInfo(car);
             // if car does not exist, add it to the system
             // its availability is set to true when calling addCar method, default is false
-            if (carIndex == -1) system.addCar(car);
-            else {
-              System.out.println("This car is duplicated. Associated order will not be loaded.\n" + 
-                                  car.toString());
+            // if (carIndex == -1) system.addCar(car);
+            // else {
+              // System.out.println("This car is duplicated. Associated order will not be loaded.\n" + 
+                                  // car.toString());
               // If the car already exists, add it to the existingCars list
-              existingCars.add(car);
-            }
+              // existingCars.add(car);
+            // }
+            loadedSystem.addCar(car);
 
           // Checking the first element and the length of data
           } else if (data[0].equals("ORDER") && data.length == 10) {
@@ -120,40 +123,46 @@ public class CSVHandler implements FileHandler<CarRentalSystem> {
             // double totalPrice = Double.parseDouble(data[9]);
             
             // Check if the car exists in the existingCars list
-            boolean duplicated = false; // flag to check if the car is duplicated
-            for (Car c :existingCars) {
-              if (c.getBrand().equals(carBrand) && c.getModel().equals(carModel) && c.getYear() == carYear && c.getDailyRate() == carDailyRate) {
-                duplicated = true;
-                break;
-              }
-            }
-            if (duplicated) continue; // skip the line if the car is duplicated
+            // boolean duplicated = false; // flag to check if the car is duplicated
+            // for (Car c :existingCars) {
+            //   if (c.getBrand().equals(carBrand) && c.getModel().equals(carModel) && c.getYear() == carYear && c.getDailyRate() == carDailyRate) {
+            //     duplicated = true;
+            //     break;
+            //   }
+            // }
+            // if (duplicated) continue; // skip the line if the car is duplicated
 
             // create a new Car object
-            Car car = new Car(carBrand, carModel, carYear, carDailyRate);
+            Car car = loadedSystem.getCars().get(loadedSystem.getCarIndexByInfo(new Car(carBrand, carModel, carYear, carDailyRate)));
             // find the index of the car in the system
             // carIndex cannot be -1
-            int carIndex = system.getCarIndexByInfo(car);
+            // int carIndex = system.getCarIndexByInfo(car);
 
             // if customer exists, just update the customer information
-            if (system.customerExists(customerName)) {
-              System.out.println(customerName + " already exists. updated VIP status.");
-              Customer[] customers = system.getCustomers();
-              for (int i = 0; i < customers.length; i++) {
-                if (customers[i].getName().equals(customerName)) {
-                  customers[i] = new Customer(customerName, isVIP);
-                  break;
-                }
-              }
-            }
+            // if (system.customerExists(customerName)) {
+            //   System.out.println(customerName + " already exists. updated VIP status.");
+            //   Customer[] customers = system.getCustomers();
+            //   for (int i = 0; i < customers.length; i++) {
+            //     if (customers[i].getName().equals(customerName)) {
+            //       customers[i] = new Customer(customerName, isVIP);
+            //       break;
+            //     }
+            //   }
+            // }
             // else create a new customer
-            else {
-              Customer customer = new Customer(customerName, isVIP);
-              system.addCustomer(customer);
-            }
+            // else {
+            Customer customer = new Customer(customerName, isVIP);
+            loadedSystem.addCustomer(customer);
+            customerCount++;
+            // }
 
             // load order data with rentCar method
-            system.rentCar(customerName, carIndex, rentalDays);
+            if (rentalDays > 7) {
+              loadedOrders.add(new LongTermRental(car, customer, rentalDays, true));
+            }
+            else {
+              loadedOrders.add(new ShortTermRental(car, customer, rentalDays, true));
+            }
           } else {
             // if the line does not match the expected format, throw DataFormatException
             throw new DataFormatException();
@@ -166,6 +175,10 @@ public class CSVHandler implements FileHandler<CarRentalSystem> {
         }
         // above exceptions are caught line by line
       }
+      // for (int i = 0; i < 4; i++) {
+      //   System.out.println(loadedSystem.getCars().get(i).toString());
+      // }
+      this.system = new CarRentalSystem(loadedSystem.getCars(), loadedSystem.getCustomers(), customerCount, loadedOrders);
     } catch (FileNotFoundException e) {
       // this exception is caught when the file does not exist
       System.out.println("File not found. Data loading failed.");
