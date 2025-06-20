@@ -508,14 +508,17 @@ public class CarRentalSystem {
           for (Customer c : rankedCustomers) {
             System.out.println(c.getName() + ": " + c.getPoints() + " points");
           }
+          System.out.println();
           break;
         
         case 10:
           rentalSystem.observer.printAllLogs();
+          System.out.println();
           break;
 
         case 11:
           rentalSystem.printWaitingList();
+          System.out.println();
           break;
 
         case 12: // exit the program
