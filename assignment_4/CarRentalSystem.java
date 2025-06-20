@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.InputMismatchException;
+import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Scanner;
 
@@ -39,7 +41,6 @@ public class CarRentalSystem {
     this.carCount++;
     car.setAvailability(true); // mark car as available
     this.cars.add(car);
-    return;
   }
 
   // method to display all available cars
@@ -55,7 +56,6 @@ public class CarRentalSystem {
         System.out.println(i + ": " + this.cars.get(i).toString());
       }
     }
-    return;
   }
 
   // method to add a customer to the system
@@ -70,7 +70,6 @@ public class CarRentalSystem {
     }
     // add customer
     this.customers[customerCount++] = customer;
-    return;
   }
 
   // method to display all registered customers
@@ -85,7 +84,6 @@ public class CarRentalSystem {
     for (int i=0; i<this.customerCount; i++) {
       System.out.println((i+1) + ". " + this.customers[i].toString());
     }
-    return;
   }
 
   // method to check if a customer with given name exists
@@ -145,7 +143,6 @@ public class CarRentalSystem {
     this.orders.add(order);
     System.out.println("Rental created successfully!");
     System.out.println(order.toString());
-    return;
   }
 
   // method to check the system has available cars
@@ -170,21 +167,18 @@ public class CarRentalSystem {
     for(int i=0; i<this.orderCount; i++) {
       System.out.println(this.orders.get(i).toString());
     }
-    return;
   }
 
   // method to save data to a file
   // exception will be handled by the caller
   public void saveAllData(String filename) throws IOException {
     fileHandler.saveData(filename);
-    return;
   }
 
   // method to load data from a file
   // exception will be handled by the caller
   public void loadAllData(String filename) throws IOException, DataFormatException{
     fileHandler.loadData(filename);
-    return;
   }
   
   /*
@@ -219,15 +213,25 @@ public class CarRentalSystem {
   */
 
   public void assignCarToNextCustomer(Car car) {
-	  //
+    WaitingCustomer wc = getNextWaitingCustomer(car);
+    if (wc == null) return;
+    rentCar(wc.getCustomer().getName(), cars.indexOf(car), wc.getRentalDays());
   }
 
   public void addCustomerToQueue(Car car, Customer customer, int rentalDays) {
-	  //
+    waitingList.putIfAbsent(car, new LinkedList<>());
+    waitingList.get(car).offer(new WaitingCustomer(customer, rentalDays));
   }
 
   public WaitingCustomer getNextWaitingCustomer(Car car) {
-	  //
+    Queue<WaitingCustomer> queue = waitingList.get(car);
+    if (queue != null && !queue.isEmpty()) return queue.poll();
+    return null;
+  }
+
+  public void startRentalProcess(RentalOrder order) {
+    RentalProcess process = new RentalProcess(order, this);
+    process.start();
   }
 
 
@@ -237,6 +241,8 @@ public class CarRentalSystem {
 
     // create a instance of CarRentalSystem class
     CarRentalSystem rentalSystem = new CarRentalSystem();
+    OrderManager orderManager = new OrderManager();
+
     int option = 0; // default value is 0
     String filename = "rental_data.csv"; // default filename for auto-saving/loading
     // try to load data from the default file when the program starts
@@ -277,8 +283,9 @@ public class CarRentalSystem {
         System.out.println("Invalid input type. Please enter a number.\n");
         // reset option to 0 to loop back to the menu
         option = 0;
+      } finally {
+        scanner.nextLine(); // ignore newline character
       }
-      scanner.nextLine(); // ignore newline character
 
       // branch based on user input
       switch (option) {
@@ -304,12 +311,11 @@ public class CarRentalSystem {
 
             // create a new Car object and add it to the system
             Car car = new Car(brand, model, year, dailyRate);
-            if (rentalSystem.getCarIndexByInfo(car) == -1) {
-              rentalSystem.addCar(car);
-              // display success message
-              System.out.println("Car added successfully!\n");
-            }
-            else System.out.println("This car already exists in the system.\n");
+            rentalSystem.addCar(car);
+            // display success message
+            System.out.println("Car added successfully!\n");
+
+            System.out.println("This car already exists in the system.\n");
           } catch (InputMismatchException e) {
             // handle invalid input type for year or daily rate
             scanner.nextLine(); // clear buffer
@@ -428,12 +434,16 @@ public class CarRentalSystem {
           }
           break;
 
-        case 9: 
-
+        case 9:
+          ArrayList<Customer> rankedCustomers = new ArrayList<Customer>();
+          for (Customer c : rentalSystem.customers) {
+            rankedCustomers.add(c);
+          }
+          rankedCustomers.sort
           break;
         
         case 10:
-
+          rentalSystem;
           break;
 
         case 11:
@@ -463,6 +473,5 @@ public class CarRentalSystem {
     }
 
     scanner.close(); // cleanup scanner
-    return;
   }
 }

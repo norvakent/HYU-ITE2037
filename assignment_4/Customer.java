@@ -4,7 +4,6 @@ public class Customer {
   private String name;     // customer name
   private boolean isVIP;   // membership status (true if VIP)
   private int points;
-	private HashMap<Customer, Integer> pointsMap;
 
   // constructor initializes the customer's name and VIP status
   public Customer(String name, boolean isVIP) {

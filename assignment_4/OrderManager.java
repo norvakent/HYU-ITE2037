@@ -1,33 +1,38 @@
 package assignment_4;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class OrderManager implements RentalObserver {
-	private ArrayList<String> logs;
+	private List<String> logs;
 	private int completedOrders;
 
 	public OrderManager() {
-		logs = new ArrayList<String>();
+		logs = new ArrayList<>();
 		completedOrders = 0;
 	}
 
 	@Override
 	public void update(RentalOrder order) {
 		Car returnedCar = order.getCar();
-		logs.add("Order completed: Customer " + order.getCustomer().getName() +
-											 " has returned car " + returnedCar.getBrand() +
-											 " " + returnedCar.getModel() +
-											 "\nCar " + returnedCar.getBrand() +
-											 " " + returnedCar.getModel() +
-											 " is now available");
+		String customerName = order.getCustomer().getName();
+		String carInfo = returnedCar.getBrand() + " " + returnedCar.getModel();
+
+		String msg1 = "Order completed: Customer " + customerName + " has returned car " + carInfo;
+		String msg2 = "Car " + carInfo + " is now available";
 		returnedCar.setAvailability(true);
-		System.out.println(logs.get(completedOrders++));
+
+		System.out.println(msg1);
+		System.out.println(msg2);
+		
+		logs.add(msg1);
+		logs.add(msg2);
+		completedOrders++;
 	}
 
 	public void printAllLogs() {
-		for (String s : logs) {
-			System.out.println(s);
-			System.out.flush();
+		for (String log : logs) {
+			System.out.println(log);
 		}
 	}
 
