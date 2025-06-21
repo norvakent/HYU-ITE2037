@@ -1,69 +1,66 @@
 package assignment_4;
 
+// Simple data class describing a car
 public class Car {
-  private String brand;        // the brand of the car
-  private String model;        // the model of the car
-  private int year;            // the year of manufacture
-  private double dailyRate;    // the daily rental price
-  private boolean isAvailable; // availability status
+  private String brand;        // car brand
+  private String model;        // car model
+  private int year;            // year of manufacture
+  private double dailyRate;    // daily rental price
+  private boolean isAvailable; // current availability
 
-  // constructor initializes the car's attributes
+  // Initialize the car fields
   public Car(String brand, String model, int year, double dailyRate) {
     this.brand = brand;
     this.model = model;
     this.year = year;
     this.dailyRate = dailyRate;
 
-    // set availability to false by default
+    // a new car is unavailable until added to the system
     this.isAvailable = false;
   }
 
-  // calculate total rental cost
+  // Calculate total rental cost for the given days
   public double getRentalPrice(int days) {
     return this.dailyRate * days;
   }
 
-  // setter for availability status
+  // Set availability status
   public synchronized void setAvailability(boolean status) {
     this.isAvailable = status;
   }
 
-  // getter for availability status
+  // Get availability status
   public synchronized boolean isAvailable() {
     return this.isAvailable;
   }
 
-  // getter for brand
+  // Brand accessor
   public String getBrand() {
     return this.brand;
   }
 
-  // getter for model
+  // Model accessor
   public String getModel() {
     return this.model;
   }
 
-  // getter for year
+  // Year accessor
   public int getYear() {
     return this.year;
   }
 
-  // getter for daily rental rate
+  // Daily rate accessor
   public double getDailyRate() {
     return this.dailyRate;
   }
 
-  // return string representation of the car
+  // Represent the car as a human-readable string
   @Override
   public String toString() {
     return this.brand + " " +
            this.model + " (" +
            this.year + ") - $" +
-           // formatting to 1 decimal place
            String.format("%.1f", this.dailyRate) + "/day - " +
-           // simply indicating word "not" using ternary operator
-           // if isAvailable() is true, it will be empty string
-           // if isAvailable() is false, it will be "Not "
            (this.isAvailable() ? "" : "Not ") + "Available";
   }
 }

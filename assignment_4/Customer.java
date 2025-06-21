@@ -1,36 +1,37 @@
 package assignment_4;
 
+// Customer information and reward points
 public class Customer {
   private String name;     // customer name
-  private boolean isVIP;   // membership status (true if VIP)
+  private boolean isVIP;   // true if VIP member
   private int points;
 
-  // constructor initializes the customer's name and VIP status
+  // Initialize customer data
   public Customer(String name, boolean isVIP) {
     this.name = name;
     this.isVIP = isVIP;
     this.points = 0;
   }
 
-  // getter for customer's name
+  // Name accessor
   public String getName() {
     return this.name;
   }
 
-  // getter for VIP status
+  // VIP status accessor
   public boolean isVIP() {
     return this.isVIP;
   }
 
   public void addPoints(int amount) {
-  	  points += amount;
+    points += amount;
   }
 
   public int getPoints() {
-	  return points;
+    return points;
   }
 
-  // return string representation of the customer
+  // Represent customer as a string
   public String toString() {
     return this.name + (this.isVIP ? " (VIP)" : "");
   }

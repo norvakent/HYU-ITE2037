@@ -3,17 +3,19 @@ package assignment_4;
 import java.util.ArrayList;
 import java.util.List;
 
+// Observer that tracks completed orders
 public class OrderManager implements RentalObserver {
-	private List<String> logs;
-	private int completedOrders;
+        private List<String> logs;
+        private int completedOrders;
 
-	public OrderManager() {
-		logs = new ArrayList<>();
-		completedOrders = 0;
-	}
+        public OrderManager() {
+                logs = new ArrayList<>();
+                completedOrders = 0;
+        }
 
-	@Override
-	public void update(RentalOrder order) {
+        // Called when a rental completes
+        @Override
+        public void update(RentalOrder order) {
 		Car returnedCar = order.getCar();
 		String customerName = order.getCustomer().getName();
 		String carInfo = returnedCar.getBrand() + " " + returnedCar.getModel();
@@ -30,13 +32,14 @@ public class OrderManager implements RentalObserver {
 		completedOrders++;
 	}
 
-	public void printAllLogs() {
+        // Print every logged message
+        public void printAllLogs() {
 		for (String log : logs) {
 			System.out.println(log);
 		}
 	}
 
-	public int getCompletedOrders() {
-		return completedOrders;
-	}
+        public int getCompletedOrders() {
+                return completedOrders;
+        }
 }

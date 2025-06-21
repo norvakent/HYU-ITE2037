@@ -3,30 +3,35 @@ package assignment_4;
 import java.util.ArrayList;
 import java.util.List;
 
+// Thread simulating a rental in progress
 public class RentalProcess extends Thread {
-	private RentalOrder order;
-	private List<RentalObserver> observers;
-	private CarRentalSystem system;
+        private RentalOrder order;
+        private List<RentalObserver> observers;
+        private CarRentalSystem system;
 
-	public RentalProcess(RentalOrder order, CarRentalSystem system) {
-		this.order = order;
-		observers = new ArrayList<>();
-		this.system = system;
-	}
+        // Prepare a new rental thread
+        public RentalProcess(RentalOrder order, CarRentalSystem system) {
+                this.order = order;
+                observers = new ArrayList<>();
+                this.system = system;
+        }
 
-	public void addObserver(RentalObserver obs) {
-		observers.add(obs);
-	}
+        // Subscribe an observer
+        public void addObserver(RentalObserver obs) {
+                observers.add(obs);
+        }
 
-	private void notifyObservers() {
-		for (RentalObserver obs : observers) {
-			obs.update(order);
-		}
-	}
+        // Notify all observers of completion
+        private void notifyObservers() {
+                for (RentalObserver obs : observers) {
+                        obs.update(order);
+                }
+        }
 
-	@Override
-	public void run() {
-		if (!system.tryAcquireRentalSlot()) return;
+        // Simulate the day-by-day rental
+        @Override
+        public void run() {
+                if (!system.tryAcquireRentalSlot()) return;
 
 		try {
 			int rentalDays = order.getRentalDays();

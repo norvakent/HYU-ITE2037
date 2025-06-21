@@ -1,7 +1,8 @@
 package assignment_4;
 
+// Standard rental without long-term discount
 public class ShortTermRental extends RentalOrder {
-  // constructor passes info to superclass constructor
+  // Pass information to the base class
   public ShortTermRental(Car car, Customer customer, int rentalDays) {
     super(car, customer, rentalDays);
   }
@@ -10,7 +11,7 @@ public class ShortTermRental extends RentalOrder {
     super(car, customer, rentalDays, isAvailable);
   }
 
-  // calculate price with optional VIP discound (10%)
+  // Calculate price with optional 10% VIP discount
   @Override
   public double calculateTotalPrice() {
     return this.car.getRentalPrice(this.rentalDays) * (this.customer.isVIP() ? 0.9 : 1);
