@@ -1,5 +1,6 @@
 package assignment_4;
 
+// Item stored in the waiting list
 public class WaitingCustomer {
   private Customer customer;
   private int rentalDays;

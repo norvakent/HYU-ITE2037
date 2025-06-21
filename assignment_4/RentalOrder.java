@@ -1,11 +1,12 @@
 package assignment_4;
 
+// Base class for rental orders
 public abstract class RentalOrder {
-  protected Car car;             // the car being rented
-  protected Customer customer;   // the customer renting the car
-  protected int rentalDays;      // the number of rental days
+  protected Car car;             // rented car
+  protected Customer customer;   // renting customer
+  protected int rentalDays;      // rental length in days
 
-  // constructor initializes the order details and marks the car as not available
+  // Initialize order details and mark the car unavailable
   public RentalOrder(Car car, Customer customer, int rentalDays) {
     this.car = car;
     this.customer= customer;
@@ -20,25 +21,25 @@ public abstract class RentalOrder {
     this.car.setAvailability(true);
   }
 
-  // abstract method to calculate total rental price (implemented in subclasses) 
+  // Calculate the total price (implemented in subclasses)
   public abstract double calculateTotalPrice();
 
-  // getter for car
+  // Car accessor
   public Car getCar() {
     return this.car;
   }
 
-  // getter for customer
+  // Customer accessor
   public Customer getCustomer() {
     return this.customer;
   }
 
-  // getter for rental days
+  // Rental days accessor
   public int getRentalDays() {
     return this.rentalDays;
   }
 
-  // return summary of the rental order
+  // Return a summary of the rental order
   public String toString() {
     return "Rental for: " + this.customer.toString() + "\n" +
            "Car: " + this.car.toString() + "\n" +
